@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { store } from "../redux/store/store"
 const axiosInstance = axios.create({
-    baseURL: 'https://wati-sender-backend.vercel.app/',
+    baseURL: '/api/',
     // baseURL: 'https://wa-wati-backend.vercel.app/',
 });
 axiosInstance.interceptors.request.use((config) => {
