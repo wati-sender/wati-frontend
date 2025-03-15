@@ -5,10 +5,9 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import TableActions from '../../common/TableActions';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
-import { render } from 'react-dom';
+import { useDebounce } from '../useDebounce';
 
 const AllTemplates = ({
-    showDelete,
     showSelect,
     selectedTemplate,
     setSelectedTemplate,
@@ -24,15 +23,16 @@ const AllTemplates = ({
         pageSize: 10,
 
     });
+    
+    const [search, setSearch] = useState('');
 
     const navigate = useNavigate()
 
-    const [modal] = Modal.useModal();
 
     const getTemplatesData = async () => {
         setLoading(true);
         try {
-            const { data } = await axiosInstance.get(`templates/all`);
+            const { data } = await axiosInstance.get(`templates/all?limit=${pagination?.pageSize}&page=${pagination?.current - 1}&search=${search}`);
             setAllTemplates(data?.templates);
         } catch (error) {
             message.error(error.message);
@@ -41,15 +41,14 @@ const AllTemplates = ({
         }
     }
 
+    const debounce = useDebounce(search)
+
     useEffect(() => {
         getTemplatesData();
-    }, [])
+    }, [pagination, debounce])
 
     const tableButtons = useMemo(() => {
         return [
-            ...(showSelect ? [] : [<Button danger type='primary' disabled={templateIds.length <= 0} onClick={() => handleMultipleDelete(templateIds)}>
-                Delete Selected
-            </Button>]),
             <Button
                 type="primary"
                 key={"create_template"}
@@ -63,26 +62,15 @@ const AllTemplates = ({
         ];
     }, [navigate, templateIds]);
 
-    const rowSelectionDelete = {
-        onChange: (selectedRowKeys) => {
-            setTemplatesIds(selectedRowKeys);
-        },
-    };
-
-    const handleMultipleDelete = async (userIds) => {
+    const handleSingleDelete = async (templateId) => {
         try {
-            // const { data } = await axiosInstance.post("/accounts/delete/multiple", { userIds })
-            message.success("Selected templates deleted successfully")
-            getTemplatesData();
-        } catch (error) {
-            message.error(error.message)
-        }
-    }
-    const handleSingleDelete = async (userId) => {
-        try {
-            // const { data } = await axiosInstance.post("/accounts/delete/single", { userId })
-            message.success("template deleted successfully")
-            getTemplatesData();
+            const { data } = await axiosInstance.post("templates/delete/single", { templateId })
+            if (data.success) {
+                message.success(data.message)
+                getTemplatesData();
+            } else {
+                message.error(data.message)
+            }
         } catch (error) {
             message.error(error.message)
         }
@@ -126,7 +114,6 @@ const AllTemplates = ({
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            render: (name, { _id }) => <Link to={_id}>{name}</Link>
         },
         {
             title: 'Success',
@@ -197,11 +184,13 @@ const AllTemplates = ({
             }}>
                 <TableActions
                     buttons={tableButtons}
+                    showSearch
+                    search={search}
+                    setSearch={setSearch}
                 />
 
                 <Card>
                     <Table
-                        rowSelection={showDelete && rowSelectionDelete}
                         loading={loading}
                         columns={columns}
                         dataSource={allTemplates}
