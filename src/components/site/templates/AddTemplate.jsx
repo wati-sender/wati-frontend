@@ -17,7 +17,8 @@ const AddTemplate = () => {
             }
         }
     ])
-    const [url, setUrl] = useState("")
+    const [imageUrl, setImageUrl] = useState("");
+    const [imageUploading, setImageUploading] = useState(false)
     const [startAccountIndex, setStartAccountIndex] = useState(null)
     const [endAccountIndex, setEndAccountIndex] = useState(null)
     const [templateType, setTemplateType] = useState("rich_card")
@@ -49,6 +50,17 @@ const AddTemplate = () => {
                 .join("_and_");
             const formData = await form.validateFields();
 
+            const headerData = {
+                "rich_card": {
+                    type: "image",
+                    link: imageUrl
+                },
+                "text_with_button": {
+                    type: "text",
+                    text: formData.text
+                }
+            }
+
             let payload = {
                 id: "",
                 type: "template",
@@ -57,7 +69,7 @@ const AddTemplate = () => {
                 buttonsType,
                 buttons: buttons,
                 footer: formData.footer,
-                header: { type: "image", link: formData.image_url },
+                header: headerData[templateType],
                 elementName: formData.template_name,
                 body: formData.body,
                 language: "en",
@@ -82,9 +94,30 @@ const AddTemplate = () => {
         }
     };
 
-    const handleUpload = ({ file }) => {
-        const fileUrl = URL.createObjectURL(file);
-        setUrl(fileUrl)
+    const handleUpload = async ({ file }) => {
+        try {
+            setImageUploading(true);
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("type", "image");
+
+            const { data } = await axiosInstance.post("/media/upload", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            if (data?.success) {
+                message.success(data?.message)
+                setImageUrl(data?.data.url);
+            } else {
+                message.success(data?.message)
+            }
+        } catch (error) {
+            message.error(error.message);
+        }
+
+
     }
 
     const handleAddButton = () => {
@@ -96,7 +129,7 @@ const AddTemplate = () => {
                 {
                     type: "quick_reply",
                     parameter: {
-                        text: "Quick reply",
+                        text: "",
                         urlType: "none",
                     }
                 },
@@ -190,17 +223,40 @@ const AddTemplate = () => {
                                         ]}
                                     >
                                         <Space direction="vertical" style={{ width: "100%" }}>
-                                            <UploadMedia url={url} handleUpload={handleUpload} />
+                                            <UploadMedia url={imageUrl} loading={imageUploading} handleUpload={handleUpload} />
                                             <Text>OR</Text>
                                             <Input
                                                 placeholder="Image Url"
                                                 maxLength={200}
                                                 showCount
+                                                value={imageUrl}
+                                                onChange={(e) => setImageUrl(e.target.value)}
                                             />
                                         </Space>
                                     </Form.Item>
                                 </Col>
                             )}
+
+                            {templateType === "text_with_button" && <Col md={24}>
+                                <Form.Item
+                                    name={"text"}
+                                    label={"Title"}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            type: "string",
+                                            message: "Please enter Title",
+                                        },
+                                        { max: 60, message: "Title must be within 60 characters" },
+                                    ]}
+                                >
+                                    <Input
+                                        placeholder="Enter Title"
+                                        maxLength={60}
+                                        showCount
+                                    />
+                                </Form.Item>
+                            </Col>}
 
                             <Col md={templateType === "rich_card" ? 12 : 24}>
                                 <Form.Item
@@ -223,6 +279,7 @@ const AddTemplate = () => {
                                     />
                                 </Form.Item>
                             </Col>
+
                             <Col md={24}>
                                 <Form.Item
                                     style={{ marginBottom: "15px" }}
@@ -249,11 +306,23 @@ const AddTemplate = () => {
                     <Flex gap={15} style={{ marginTop: 25, }} justify="flex-end">
                         <Form.Item
                             name={"start account number"}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter start account number",
+                                }
+                            ]}
                         >
                             <Input size="default size" onChange={e => setStartAccountIndex(e.target.value)} type="number" style={{ width: '100%' }} placeholder="Start Account Number" />
                         </Form.Item>
                         <Form.Item
                             name={"end account number"}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter end account number",
+                                }
+                            ]}
                         >
                             <Input size="default size" onChange={e => setEndAccountIndex(e.target.value)} type="number" style={{ width: '100%' }} placeholder="End Account Number" />
                         </Form.Item>
