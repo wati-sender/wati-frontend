@@ -1,4 +1,4 @@
-import { Button, Card, Dropdown, Flex, Form, message, Modal, Popconfirm, Row, Select, Table, Tooltip, Typography, Upload } from 'antd';
+import { Button, Card, Checkbox, Dropdown, Flex, Form, message, Modal, Popconfirm, Row, Select, Table, Tooltip, Typography, Upload } from 'antd';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { DeleteOutlined, DownOutlined, FilterOutlined, ImportOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react'
@@ -23,6 +23,7 @@ const AllAccounts = ({
     })
     const [allAccounts, setAllAccounts] = useState([]);
     const [accountIds, setAccountIds] = useState([]);
+    const [search, setSearch] = useState('');
 
     const getAccountData = async (query) => {
         setLoading(true);
@@ -35,6 +36,10 @@ const AllAccounts = ({
 
             if (query.quality_rating !== "ALL") {
                 queryParams.append("quality_rating", query.quality_rating);
+            }
+
+            if (search) {
+                queryParams.append("search", search);
             }
 
             const queryString = queryParams.toString();
@@ -96,12 +101,25 @@ const AllAccounts = ({
         }
     };
 
+    const CustomSelectAll = () => {
+        return <Checkbox onChange={(e) => {
+            const checked = e.target.checked;
+            if (checked) {
+                setSelectedAccounts(allAccounts.map((item) => item._id))
+            } else {
+                setSelectedAccounts([])
+            }
+        }} />
+    }
+
     const rowSelection = {
         selectedRowKeys: selectedAccounts,
         onChange: (selectedRowKeys, selectedRows) => {
             setSelectedAccounts(selectedRows.map(({ _id }) => _id))
         },
+        columnTitle: CustomSelectAll
     };
+
     const rowSelectionDelete = {
         onChange: (selectedRowKeys) => {
             setAccountIds(selectedRowKeys);
@@ -195,7 +213,7 @@ const AllAccounts = ({
             title: 'Login URL',
             dataIndex: 'loginUrl',
             key: 'loginUrl',
-            render: (loginUrl) => <Link to={loginUrl}>{loginUrl} </Link> ?? "-",
+            render: (loginUrl) => <Link to={loginUrl} target='_blank'>{loginUrl} </Link> ?? "-",
         },
         {
             title: "Actions",
@@ -233,87 +251,91 @@ const AllAccounts = ({
         <PageContainer
             title="Accounts"
         >
-                <Flex style={{
-                    flexDirection: 'column',
-                    gap: "1rem",
-                }}>
-                    <TableActions buttons={tableButtons} />
+            <Flex style={{
+                flexDirection: 'column',
+                gap: "1rem",
+            }}>
+                <TableActions
+                    buttons={tableButtons}
+                    search={search}
+                    setSearch={setSearch}
+                />
 
-                    <Card>
-                        <Table
-                            rowSelection={showSelect ? rowSelection : showDelete && rowSelectionDelete}
-                            columns={columns}
-                            dataSource={allAccounts}
-                            loading={loading}
-                            scroll={{
-                                x: 1200,
-                            }}
-                            rowKey={(record) => record._id}
-                            footer={() => {
-                                return (
-                                    <Row >
-                                        <Typography.Text style={{ marginRight: 10 }}>
-                                            Total: <b>{allAccounts?.length}</b>
-                                        </Typography.Text>
-                                        <Typography.Text>
-                                            {showSelect && <>Selected: <b>{selectedAccounts?.length}</b></>}
-                                        </Typography.Text>
-                                    </Row>
-                                );
-                            }}
+                <Card>
+                    <Table
+                        rowSelection={showSelect ? rowSelection : showDelete && rowSelectionDelete}
+                        columns={columns}
+                        dataSource={allAccounts}
+                        loading={loading}
+                        scroll={{
+                            x: 1200,
+                        }}
+                        rowKey={(record) => record._id}
+                        footer={() => {
+                            return (
+                                <Row >
+                                    <Typography.Text style={{ marginRight: 10 }}>
+                                        Total: <b>{allAccounts?.length}</b>
+                                    </Typography.Text>
+                                    <Typography.Text>
+                                        {showSelect && <>Selected: <b>{selectedAccounts?.length}</b></>}
+                                    </Typography.Text>
+                                </Row>
+                            );
+                        }}
+                    />
+                </Card>
+            </Flex>
+
+            <Modal
+                title="Apply Filters"
+                centered
+                open={filterModal}
+                onOk={() => {
+                    getAccountData(filters);
+                    setFilterModal(false);
+                }}
+                onCancel={() => setFilterModal(false)}
+                okText="Apply"
+                cancelText="Cancel"
+            >
+                <Form layout="vertical">
+                    <Form.Item
+                        label="Filter by Account Status"
+                        initialValue={filters.account_status}
+                    >
+                        <Select
+                            value={filters.account_status}
+                            onChange={(value) => setFilters(prev => ({ ...prev, account_status: value }))}
+                            style={{ width: "100%" }}
+                            options={[
+                                { label: "ALL", value: "ALL" },
+                                { label: "CONNECTED", value: "CONNECTED" },
+                                { label: "BANNED", value: "BANNED" },
+                                { label: "FLAG", value: "FLAG" },
+                            ]}
                         />
-                    </Card>
-                </Flex>
+                    </Form.Item>
 
-                <Modal
-                    title="Apply Filters"
-                    centered
-                    open={filterModal}
-                    onOk={() => {
-                        getAccountData(filters);
-                        setFilterModal(false);
-                    }}
-                    onCancel={() => setFilterModal(false)}
-                    okText="Apply"
-                    cancelText="Cancel"
-                >
-                    <Form layout="vertical">
-                        <Form.Item
-                            label="Filter by Account Status"
-                            initialValue={filters.account_status}
-                        >
-                            <Select
-                                value={filters.account_status}
-                                onChange={(value) => setFilters(prev => ({ ...prev, account_status: value }))}
-                                style={{ width: "100%" }}
-                                options={[
-                                    { label: "ALL", value: "ALL" },
-                                    { label: "CONNECTED", value: "CONNECTED" },
-                                    { label: "BANNED", value: "BANNED" },
-                                    { label: "FLAG", value: "FLAG" },
-                                ]}
-                            />
-                        </Form.Item>
+                    <Form.Item
+                        label="Filter by Quality Rating"
+                        initialValue={filters.quality_rating}
+                    >
+                        <Select
+                            value={filters.quality_rating}
+                            onChange={(value) => setFilters(prev => ({ ...prev, quality_rating: value }))}
+                            style={{ width: "100%" }}
+                            options={[
+                                { label: "ALL", value: "ALL" },
+                                { label: "GREEN", value: "GREEN" },
+                                { label: "MEDIUM", value: "MEDIUM" },
+                                { label: "LOW", value: "LOW" },
+                            ]}
+                        />
+                    </Form.Item>
 
-                        <Form.Item
-                            label="Filter by Quality Rating"
-                            initialValue={filters.quality_rating}
-                        >
-                            <Select
-                                value={filters.quality_rating}
-                                onChange={(value) => setFilters(prev => ({ ...prev, quality_rating: value }))}
-                                style={{ width: "100%" }}
-                                options={[
-                                    { label: "ALL", value: "ALL" },
-                                    { label: "GREEN", value: "GREEN" },
-                                    { label: "MEDIUM", value: "MEDIUM" },
-                                    { label: "LOW", value: "LOW" },
-                                ]}
-                            />
-                        </Form.Item>
-
-                    </Form>
-                </Modal>
+                </Form>
+            </Modal>
         </PageContainer>
     )
 }

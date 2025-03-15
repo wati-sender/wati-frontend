@@ -51,7 +51,7 @@ const AllCampaign = () => {
                 type="primary"
                 key={"create_template"}
                 onClick={() => {
-                    navigate("/campaign/add");
+                    navigate("add");
                 }}
                 icon={<PlusCircleOutlined />}
             >

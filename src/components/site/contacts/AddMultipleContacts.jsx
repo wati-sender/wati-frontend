@@ -1,9 +1,8 @@
 import { Modal, Table, message } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React, { useState } from 'react';
-import axiosInstance from '../../../axios/axiosInstance';
 
-const AddMultipleContacts = ({ open, handleClose, afterOk }) => {
+const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
     const [enteredContactString, setEnteredContactString] = useState("");
     const [contacts, setContacts] = useState([]);
     const [errors, setErrors] = useState([]);
@@ -19,23 +18,6 @@ const AddMultipleContacts = ({ open, handleClose, afterOk }) => {
             setContacts([]);
             return;
         }
-
-        // const rows = value.split("\n").map((line) => {
-        //     const values = line.split(" ").map((item) => item.trim());
-        //     return {
-        //         countryCode: values[0] || "",
-        //         phone: values[1] || "",
-        //     };
-        // });
-
-        // const rows = value.split("\n").map((line) => {
-        //     const delimiter = line.includes(",") ? "," : " ";
-        //     const values = line.split(delimiter).map((item) => item.trim());
-        //     return {
-        //         countryCode: values[0] || "",
-        //         phone: values[1] || "",
-        //     };
-        // }); 
 
         const rows = value.split("\n").map((line) => {
             const values = line.split(/,|\s+/).map((item) => item.trim());
@@ -79,23 +61,32 @@ const AddMultipleContacts = ({ open, handleClose, afterOk }) => {
         if (!validateContacts()) {
             return;
         }
-        if (contacts.length > 0) {
-            console.log("Contacts added:", contacts);
 
-            const { data } = await axiosInstance.post("contacts/add/bulk", { contacts });
-            if (data.status) {
-                handleClose()
-                message.success(data.message);
-                setEnteredContactString("");
-                setContacts([])
-                await afterOk();
-            }
+        setContactsData(prev => {
+            // Create a Set with existing contact keys
+            const existingContacts = new Set(prev.map(contact => `${contact.countryCode}-${contact.phone}`));
 
-        } else {
-            handleClose();
-        }
+            // Filter out duplicates from new contacts
+            const uniqueContacts = contacts.filter(contact => {
+                const contactKey = `${contact.countryCode}-${contact.phone}`;
+                if (existingContacts.has(contactKey)) {
+                    return false; // Skip duplicate
+                }
+                existingContacts.add(contactKey);
+                return true; // Add unique contact
+            });
+
+            message.success("Contacts added successfully");
+
+            setErrors([]);
+            setEnteredContactString("");
+            setOpen(false);
+
+            return [...prev, ...uniqueContacts];
+        });
+
+        setContacts([]);
     };
-
     const columns = [
         {
             title: "SN",
@@ -131,7 +122,7 @@ const AddMultipleContacts = ({ open, handleClose, afterOk }) => {
             centered
             open={open}
             onOk={handleOk}
-            onCancel={handleClose}
+            onCancel={() => setOpen(false)}
             okText={"Add"}
             cancelText="Cancel"
         >

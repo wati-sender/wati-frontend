@@ -6,14 +6,16 @@ import BasicConfiguration from "./BasicConfiguration";
 import axiosInstance from "../../../axios/axiosInstance";
 import { PageContainer, ProCard } from "@ant-design/pro-components";
 import AllContacts from "../contacts/AllContacts";
+import { useNavigate } from "react-router-dom";
 
 const Campaign = () => {
-
+  const navigate = useNavigate()
   const [campaignName, setCampaignName] = useState("")
   const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedContacts, setSelectedContacts] = useState([]);
   const [current, setCurrent] = useState(0);
+  const [sending, setSending] = useState(false);
 
   const steps = [
     {
@@ -74,21 +76,24 @@ const Campaign = () => {
       message.warning("please select atleast one contact!");
     } else {
       try {
-
+        setSending(true)
         const payload = {
           template_name: selectedTemplate,
           account_ids: selectedAccounts,
           broadcast_name: campaignName,
-          receivers: selectedContacts.map((contact) => ({ whatsappNumber: contact }))
+          receivers: selectedContacts.map((contact) => ({ whatsappNumber: `${contact.countryCode}${contact?.phone}` }))
         }
         const { data } = await axiosInstance.post("/messages/send/bulk", payload)
         if (data.success) {
           message.success(data?.message);
+          navigate("/campaigns")
         } else {
           message.error(data?.message)
         }
       } catch (error) {
         message.error(error.message)
+      } finally {
+        setSending(false)
       }
     }
   }
@@ -111,7 +116,7 @@ const Campaign = () => {
             Next
           </Button>
         ) : (
-          <Button type="primary" onClick={handleSendMessage}>
+          <Button loading={sending} disabled={sending} type="primary" onClick={handleSendMessage}>
             Send Message
           </Button>
         )}

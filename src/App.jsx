@@ -38,17 +38,17 @@ function App() {
           <Route exact path="*" element={<>Not Found</>} />
           <Route exact path="/" element={<RouteWrapper component={AllAccounts} showDelete />} />
 
-          <Route exact path="/templates" element={<RouteWrapper component={AllTemplates} showDelete />} />
+          <Route exact path="/templates" element={<RouteWrapper component={AllTemplates} />} />
           <Route exact path="/templates/:id" element={<RouteWrapper component={SingleTemplate} />} />
           <Route exact path="/templates/add" element={<RouteWrapper component={AddTemplate} />} />
 
-          <Route exact path="/contacts" element={<RouteWrapper component={AllContacts} showDelete />} />4
+          <Route exact path="/contacts" element={<RouteWrapper component={AllContacts} />} />4
 
           <Route exact path="/accounts" element={<RouteWrapper component={AllAccounts} showDelete />} />
 
-          <Route exact path="/campaign" element={<RouteWrapper component={AllCampaign} />} />
-          <Route exact path="/campaign/:id" element={<RouteWrapper component={SingleCampaign} />} />
-          <Route exact path="/campaign/add" element={<RouteWrapper component={Campaign} />} />
+          <Route exact path="/campaigns" element={<RouteWrapper component={AllCampaign} />} />
+          <Route exact path="/campaigns/:id" element={<RouteWrapper component={SingleCampaign} />} />
+          <Route exact path="/campaigns/add" element={<RouteWrapper component={Campaign} />} />
 
           <Route exact path="/reports" element={<RouteWrapper component={Reports} />} />
 

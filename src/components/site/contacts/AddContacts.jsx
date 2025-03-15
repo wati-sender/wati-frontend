@@ -1,53 +1,48 @@
-import { Form, Input, Modal } from "antd";
+import { Form, Input, message, Modal } from "antd";
 import React, { useEffect, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css"; // Import styles for PhoneInput
 
-const AddContacts = ({ open, handleCloseModal, handleSubmit, isEdit, singleData }) => {
+const AddContacts = ({ open, setOpen, setContacts }) => {
   const [form] = Form.useForm();
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("");
 
-  useEffect(() => {
-    if (isEdit && singleData) {
-      form.setFieldsValue({
-        name: singleData.name,
-      });
-
-      // Extract only the mobile number (remove country code)
-      const cleanedNumber = singleData.phone?.replace(`+${singleData.countryCode}`, "");
-
-      setPhone(cleanedNumber);
-      setCountryCode(singleData.countryCode || "91");
-    }
-  }, [isEdit, singleData, form]);
-
   const handleOk = async () => {
     try {
-      const formData = await form.validateFields();
+      await form.validateFields();
+      setContacts(prevContacts => {
+        const isDuplicate = prevContacts?.some(
+          contact => contact.countryCode === countryCode && contact.phone === phone
+        );
 
-      const newValue = {
-        ...formData,
-        phone,
-        countryCode
-      };
+        if (isDuplicate) {
+          message.warning("Contact already exists");
+          return prevContacts;
+        }
 
-      handleSubmit(newValue);
-      form.resetFields();
-      handleCloseModal();
+        message.success("Contact added successfully!");
+        setPhone("");
+        setCountryCode("");
+        setOpen(false);
+        form.resetFields();
+
+        return [...prevContacts, { countryCode, phone }];
+      });
     } catch (error) {
-      console.log("Validation failed:", error);
+      console.error("Validation failed:", error);
     }
   };
 
   return (
     <Modal
       title="Add Contact"
+      width={320}
       centered
       open={open}
       onOk={handleOk}
-      onCancel={handleCloseModal}
-      okText={isEdit ? "Update" : "Add"}
+      onCancel={() => setOpen(false)}
+      okText={"Add"}
       cancelText="Cancel"
     >
       <Form form={form} layout="vertical">
@@ -59,20 +54,37 @@ const AddContacts = ({ open, handleCloseModal, handleSubmit, isEdit, singleData 
               required: true,
               message: "Please enter a valid phone number",
             },
+            {
+              min: 12, // Maximum length rule (adjust as needed)
+              message: "Please enter a valid phone number",
+            },
+            {
+              pattern: /^\d+$/, // Ensures only numeric values
+              message: "Please enter a valid phone number",
+            }
           ]}
         >
           <PhoneInput
-            country={"in"} 
-            value={`${countryCode}${phone}`} 
+            country={"in"}
+            value={`${countryCode}${phone}`}
             inputStyle={{ width: "100%" }}
             placeholder="Enter Phone Number"
             onChange={(value, country) => {
               const dialCode = country.dialCode;
               const mobileNumber = value.replace(dialCode, "");
 
-              setPhone(mobileNumber);
-              setCountryCode(dialCode);
-              form.setFieldsValue({ phone: value });
+              // Limit mobile number length
+              if (mobileNumber.length <= 10) {
+                setPhone(mobileNumber);
+                setCountryCode(dialCode);
+                form.setFieldsValue({ phone: value });
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleOk();
+              }
             }}
           />
         </Form.Item>
