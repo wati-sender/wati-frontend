@@ -22,7 +22,7 @@ const menu = {
       //   name: "Contacts",
       // },
       {
-        path: "/campaign",
+        path: "/campaigns",
         name: "Campaigns",
       },
       {
