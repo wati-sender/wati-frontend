@@ -35,8 +35,8 @@ const AllAccounts = ({
         try {
             const queryParams = new URLSearchParams();
 
-            queryParams.append("page", page - 1);
-            queryParams.append("limit", pageSize);
+            // queryParams.append("page", page - 1);
+            // queryParams.append("limit", pageSize);
 
             if (query.account_status !== "ALL") {
                 queryParams.append("account_status", query.account_status);
