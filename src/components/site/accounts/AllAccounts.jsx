@@ -68,7 +68,9 @@ const AllAccounts = ({
 
     useEffect(() => {
         getAccountData(filters);
-    }, [page, pageSize, debounce])
+    // }, [page, pageSize, debounce])
+    }, [debounce])
+    
 
 
     const handleUpload = async (file) => {
