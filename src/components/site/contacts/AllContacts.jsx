@@ -10,8 +10,6 @@ import AddMultipleContacts from './AddMultipleContacts';
 
 
 const AllContacts = ({
-    showDelete,
-    showSelect,
     selectedContacts = [],
     setSelectedContacts
 }) => {
@@ -21,7 +19,7 @@ const AllContacts = ({
     const [addMultipleModal, setAddMultipleModal] = useState(false);
 
     useEffect(() => {
-        setSelectedContacts(contacts)
+        if (typeof setSelectedContacts === 'function') setSelectedContacts(contacts)
     }, [contacts])
 
     const handleUpload = async (file) => {
@@ -43,20 +41,17 @@ const AllContacts = ({
             const sheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-            const newContacts = jsonData.map(({ phone, countryCode }) => ({ phone, countryCode }));
+            const newContacts = jsonData.map(({ phone }) => ({ phone }));
 
             setContacts(prev => {
-                // Create a Set with existing contact keys
-                const existingContacts = new Set(prev.map(contact => `${contact.countryCode}-${contact.phone}`));
+                const existingContacts = new Set(prev.map((contact) => contact.phone));
 
-                // Filter out duplicates from new contacts
                 const uniqueContacts = newContacts.filter(contact => {
-                    const contactKey = `${contact.countryCode}-${contact.phone}`;
-                    if (existingContacts.has(contactKey)) {
-                        return false; // Skip duplicate
+                    if (existingContacts.has(contact.phone)) {
+                        return false; 
                     }
-                    existingContacts.add(contactKey);
-                    return true; // Add unique contact
+                    existingContacts.add(contact.phone);
+                    return true; 
                 });
 
                 if (uniqueContacts.length > 0) {
@@ -116,12 +111,6 @@ const AllContacts = ({
             width: 60,
             key: "sn",
             render: (text, record, index) => index + 1,
-        },
-        {
-            title: 'Country Code',
-            dataIndex: 'countryCode',
-            key: 'countryCode',
-            render: (countryCode) => countryCode ?? "-",
         },
         {
             title: 'Phone Number',

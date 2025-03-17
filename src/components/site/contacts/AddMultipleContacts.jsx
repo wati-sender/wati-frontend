@@ -8,31 +8,31 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
     const [errors, setErrors] = useState([]);
 
     // Define the fixed phone number length (10 digits)
-    const fixedPhoneLength = 10;
+    const fixedPhoneLength = 12;
 
     const handleInputChange = (e) => {
         const { value } = e.target;
         setEnteredContactString(value);
 
-        if (!value) {
+        if (!value.trim()) {
             setContacts([]);
             return;
         }
 
-        const rows = value.split("\n").map((line) => {
-            const values = line.split(/,|\s+/).map((item) => item.trim());
-            return {
-                countryCode: values[0] || "",
-                phone: values[1] || "",
-            };
-        });
+        const rows = value
+            .split(/[\n,]+/)
+            .flatMap((line) => line.trim().split(/\s+/))
+            .filter(Boolean)
+            .map((phone) => ({
+                phone,
+            }));
 
         setContacts(rows);
         setErrors([]);
     };
 
+
     // Validation functions
-    const isInvalidCountryCode = (code) => !/^\d+$/.test(code);
     const isInvalidPhone = (phone) => !/^\d+$/.test(phone) || phone.length !== fixedPhoneLength;
 
     const validateContacts = () => {
@@ -40,7 +40,6 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
 
         contacts.forEach((contact, index) => {
             let rowErrors = [];
-            if (isInvalidCountryCode(contact.countryCode)) rowErrors.push("Country Code must be numeric");
             if (isInvalidPhone(contact.phone)) rowErrors.push(`Phone Number must be exactly ${fixedPhoneLength} digits`);
 
             if (rowErrors.length) {
@@ -63,17 +62,14 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
         }
 
         setContactsData(prev => {
-            // Create a Set with existing contact keys
-            const existingContacts = new Set(prev.map(contact => `${contact.countryCode}-${contact.phone}`));
+            const existingContacts = new Set(prev.map(contact => contact.phone));
 
-            // Filter out duplicates from new contacts
             const uniqueContacts = contacts.filter(contact => {
-                const contactKey = `${contact.countryCode}-${contact.phone}`;
-                if (existingContacts.has(contactKey)) {
-                    return false; // Skip duplicate
+                if (existingContacts.has(contact.phone)) {
+                    return false; 
                 }
-                existingContacts.add(contactKey);
-                return true; // Add unique contact
+                existingContacts.add(contact.phone);
+                return true; 
             });
 
             message.success("Contacts added successfully");
@@ -93,16 +89,6 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
             width: 60,
             key: "sn",
             render: (text, record, index) => index + 1,
-        },
-        {
-            title: 'Country Code',
-            dataIndex: 'countryCode',
-            key: 'countryCode',
-            render: (countryCode) => (
-                <span style={{ color: isInvalidCountryCode(countryCode) ? "red" : "inherit" }}>
-                    {countryCode || ""}
-                </span>
-            ),
         },
         {
             title: 'Phone Number',

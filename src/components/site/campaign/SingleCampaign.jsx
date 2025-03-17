@@ -132,7 +132,7 @@ const SingleCampaign = () => {
             title: 'Login URL',
             dataIndex: 'loginUrl',
             key: 'loginUrl',
-            render: (loginUrl) => loginUrl ? <Link to={loginUrl}>{loginUrl}</Link> : "-",
+            render: (loginUrl) => loginUrl ? <Link to={loginUrl} target='_blank'>{loginUrl}</Link> : "-",
         },
         {
             title: "Actions",

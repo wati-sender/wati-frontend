@@ -18,12 +18,10 @@ const AllTemplates = ({
     const [loading, setLoading] = useState(false)
     const [templateIds, setTemplatesIds] = useState([]);
     const [submittingIds, setSubmittingIds] = useState([]);
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
 
-    });
-    
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState('');
 
     const navigate = useNavigate()
@@ -32,8 +30,9 @@ const AllTemplates = ({
     const getTemplatesData = async () => {
         setLoading(true);
         try {
-            const { data } = await axiosInstance.get(`templates/all?limit=${pagination?.pageSize}&page=${pagination?.current - 1}&search=${search}`);
+            const { data } = await axiosInstance.get(`templates/all?limit=${pageSize}&page=${page - 1}&search=${search}`);
             setAllTemplates(data?.templates);
+            setTotal(data?.total);
         } catch (error) {
             message.error(error.message);
         } finally {
@@ -45,7 +44,7 @@ const AllTemplates = ({
 
     useEffect(() => {
         getTemplatesData();
-    }, [pagination, debounce])
+    }, [page, pageSize, debounce])
 
     const tableButtons = useMemo(() => {
         return [
@@ -106,8 +105,8 @@ const AllTemplates = ({
                     onChange={() => setSelectedTemplate(name)}
                     id={_id}
                 >
-                    {pagination.pageSize * (pagination.current - 1) + (index + 1)}
-                </Radio> : <>{pagination.pageSize * (pagination.current - 1) + (index + 1)}</>)
+                    {pageSize * (page - 1) + (index + 1)}
+                </Radio> : <>{pageSize * (page - 1) + (index + 1)}</>)
             },
         },
         {
@@ -195,15 +194,15 @@ const AllTemplates = ({
                         columns={columns}
                         dataSource={allTemplates}
                         scroll={{
-                            x: 1200,
+                            x: 1000,
                         }}
                         pagination={{
-                            current: pagination.current,
-                            pageSize: pagination.pageSize,
-                            total: allTemplates.length,
-                            showSizeChanger: true,
-                            onChange: (page, pageSize) => {
-                                setPagination({ current: page, pageSize });
+                            total: total,
+                            current: page,
+                            pageSize: pageSize,
+                            onChange(p, ps) {
+                                if (p !== page) setPage(p);
+                                if (ps !== pageSize) setPageSize(ps);
                             },
                         }}
                         rowKey={(record) => record?._id}
@@ -211,7 +210,7 @@ const AllTemplates = ({
                             return (
                                 <Row >
                                     <Typography.Text style={{ marginRight: 10 }}>
-                                        {"Total"}: <b>{allTemplates.length}</b>
+                                        {"Total"}: <b>{total}</b>
                                     </Typography.Text>
                                     {showSelect && <Typography.Text>
                                         {"Selected"}: <b>{selectedTemplate}</b>

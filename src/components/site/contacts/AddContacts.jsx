@@ -6,14 +6,13 @@ import "react-phone-input-2/lib/style.css"; // Import styles for PhoneInput
 const AddContacts = ({ open, setOpen, setContacts }) => {
   const [form] = Form.useForm();
   const [phone, setPhone] = useState("");
-  const [countryCode, setCountryCode] = useState("");
 
   const handleOk = async () => {
     try {
       await form.validateFields();
       setContacts(prevContacts => {
         const isDuplicate = prevContacts?.some(
-          contact => contact.countryCode === countryCode && contact.phone === phone
+          contact => contact.phone === phone
         );
 
         if (isDuplicate) {
@@ -23,11 +22,10 @@ const AddContacts = ({ open, setOpen, setContacts }) => {
 
         message.success("Contact added successfully!");
         setPhone("");
-        setCountryCode("");
         setOpen(false);
         form.resetFields();
 
-        return [...prevContacts, { countryCode, phone }];
+        return [...prevContacts, { phone }];
       });
     } catch (error) {
       console.error("Validation failed:", error);
@@ -55,10 +53,6 @@ const AddContacts = ({ open, setOpen, setContacts }) => {
               message: "Please enter a valid phone number",
             },
             {
-              min: 12, // Maximum length rule (adjust as needed)
-              message: "Please enter a valid phone number",
-            },
-            {
               pattern: /^\d+$/, // Ensures only numeric values
               message: "Please enter a valid phone number",
             }
@@ -66,17 +60,15 @@ const AddContacts = ({ open, setOpen, setContacts }) => {
         >
           <PhoneInput
             country={"in"}
-            value={`${countryCode}${phone}`}
+            value={phone}
             inputStyle={{ width: "100%" }}
             placeholder="Enter Phone Number"
             onChange={(value, country) => {
               const dialCode = country.dialCode;
               const mobileNumber = value.replace(dialCode, "");
 
-              // Limit mobile number length
               if (mobileNumber.length <= 10) {
-                setPhone(mobileNumber);
-                setCountryCode(dialCode);
+                setPhone(dialCode + mobileNumber);
                 form.setFieldsValue({ phone: value });
               }
             }}

@@ -6,6 +6,7 @@ import TableActions from '../../common/TableActions';
 import * as XLSX from "xlsx";
 import axiosInstance from '../../../axios/axiosInstance';
 import { Link } from 'react-router-dom';
+import { useDebounce } from '../useDebounce';
 
 
 const AllAccounts = ({
@@ -23,12 +24,19 @@ const AllAccounts = ({
     })
     const [allAccounts, setAllAccounts] = useState([]);
     const [accountIds, setAccountIds] = useState([]);
+
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState('');
 
     const getAccountData = async (query) => {
         setLoading(true);
         try {
             const queryParams = new URLSearchParams();
+
+            queryParams.append("page", page - 1);
+            queryParams.append("limit", pageSize);
 
             if (query.account_status !== "ALL") {
                 queryParams.append("account_status", query.account_status);
@@ -46,6 +54,7 @@ const AllAccounts = ({
             const url = `accounts/all${queryString ? `?${queryString}` : ""}`;
             const { data } = await axiosInstance.get(url);
             setAllAccounts(data?.accounts);
+            setTotal(data?.total);
             setLoading(false);
         } catch (error) {
             message.error(error.message);
@@ -55,9 +64,11 @@ const AllAccounts = ({
 
     }
 
+    const debounce = useDebounce(search)
+
     useEffect(() => {
         getAccountData(filters);
-    }, [])
+    }, [page, pageSize, debounce])
 
 
     const handleUpload = async (file) => {
@@ -183,7 +194,7 @@ const AllAccounts = ({
             title: "SN",
             width: 60,
             key: "sn",
-            render: (text, record, index) => index + 1,
+            render: (text, record, index) => (page - 1) * pageSize + (1 + index),
         },
         {
             title: 'Name',
@@ -257,6 +268,7 @@ const AllAccounts = ({
             }}>
                 <TableActions
                     buttons={tableButtons}
+                    showSearch
                     search={search}
                     setSearch={setSearch}
                 />
@@ -268,14 +280,23 @@ const AllAccounts = ({
                         dataSource={allAccounts}
                         loading={loading}
                         scroll={{
-                            x: 1200,
+                            x: 1000,
+                        }}
+                        pagination={{
+                            total: total,
+                            current: page,
+                            pageSize: pageSize,
+                            onChange(p, ps) {
+                                if (p !== page) setPage(p);
+                                if (ps !== pageSize) setPageSize(ps);
+                            },
                         }}
                         rowKey={(record) => record._id}
                         footer={() => {
                             return (
                                 <Row >
                                     <Typography.Text style={{ marginRight: 10 }}>
-                                        Total: <b>{allAccounts?.length}</b>
+                                        Total: <b>{total}</b>
                                     </Typography.Text>
                                     <Typography.Text>
                                         {showSelect && <>Selected: <b>{selectedAccounts?.length}</b></>}

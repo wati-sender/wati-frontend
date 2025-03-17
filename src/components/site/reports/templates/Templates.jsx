@@ -5,25 +5,28 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import TableActions from '../../../common/TableActions';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../axios/axiosInstance';
+import { useDebounce } from '../../useDebounce';
 const Templates = () => {
 
     // const allTemplates = templateData.result.items
     const [reports, setReports] = useState([])
     const [loading, setLoading] = useState(false)
     const [reportIds, setReportIds] = useState([]);
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
-    });
+
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState('');
 
 
     const getTemplatesReport = async () => {
         setLoading(true);
         try {
-            const { data } = await axiosInstance.get("/reports/template/bulkcreate");
+            const { data } = await axiosInstance.get(`/reports/template/bulkcreate?limit=${pageSize}&page=${page - 1}&search=${search}`);
             if (data?.success) {
                 setReportIds([])
                 setReports(data.reports)
+                setTotal(data.total)
             }
         } catch (error) {
             message.error(error.message);
@@ -32,9 +35,11 @@ const Templates = () => {
         }
     }
 
+    const debounce = useDebounce(search)
+
     useEffect(() => {
         getTemplatesReport();
-    }, [])
+    }, [pageSize, pageSize, debounce])
 
     const tableButtons = [
         <Button danger type='primary' disabled={reportIds.length <= 0} onClick={() => handleMultipleDelete(reportIds)}>
@@ -77,14 +82,14 @@ const Templates = () => {
             title: "SN",
             width: 60,
             render: (text, record, index) => {
-                return (pagination.pageSize * (pagination.current - 1) + (index + 1))
+                return (pageSize * (page - 1) + (index + 1))
             },
         },
         {
             title: 'Template Name',
             dataIndex: 'templateName',
             key: 'templateName',
-            render: (text, record, index) => {
+            render: (text, record) => {
                 return <Link to={record?._id}>{text}</Link>
             }
         },
@@ -92,18 +97,19 @@ const Templates = () => {
             title: 'Total Accounts',
             dataIndex: 'totalAccounts',
             key: 'totalAccounts',
+            render: (accounts) => `${accounts} Accounts`
         },
         {
             title: 'Success Accounts',
             dataIndex: 'success',
             key: 'success',
-            render: (accounts) => accounts.length ?? 0
+            render: (accounts) => `${accounts.length} Accounts`
         },
         {
             title: 'Failed Accounts',
             dataIndex: 'failed',
             key: 'failed',
-            render: (accounts) => accounts?.length ?? 0
+            render: (accounts) => `${accounts.length} Accounts`
         },
         {
             title: "Actions",
@@ -149,6 +155,9 @@ const Templates = () => {
                 }}>
                     <TableActions
                         buttons={tableButtons}
+                        showSearch
+                        search={search}
+                        setSearch={setSearch}
                     />
 
                     <Card>
@@ -158,12 +167,12 @@ const Templates = () => {
                             columns={columns}
                             dataSource={reports}
                             pagination={{
-                                current: pagination.current,
-                                pageSize: pagination.pageSize,
-                                total: reports.length,
-                                showSizeChanger: true,
-                                onChange: (page, pageSize) => {
-                                    setPagination({ current: page, pageSize });
+                                total: total,
+                                current: page,
+                                pageSize: pageSize,
+                                onChange(p, ps) {
+                                    if (p !== page) setPage(p);
+                                    if (ps !== pageSize) setPageSize(ps);
                                 },
                             }}
                             rowKey={(record) => record?._id}
@@ -171,7 +180,7 @@ const Templates = () => {
                                 return (
                                     <Row >
                                         <Typography.Text style={{ marginRight: 10 }}>
-                                            {"Total"}: <b>{reports.length}</b>
+                                            {"Total"}: <b>{total}</b>
                                         </Typography.Text>
                                     </Row>
                                 );

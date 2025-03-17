@@ -85,12 +85,9 @@ const SingleTemplate = () => {
         },
     ];
 
-
-
-
     return (
         <PageContainer
-            title={`Report : ${templates[0]?.templateName}`}
+            title={`Template Report : ${templates[0]?.templateName ?? ""}`}
             loading={loading}
         >
             <Card>

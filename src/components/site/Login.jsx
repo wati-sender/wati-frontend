@@ -1,7 +1,7 @@
 import { KeyOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, Typography, message } from 'antd';
 import { WhatsAppOutlined } from '@ant-design/icons';
-import React from 'react';
+import React, { useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
 import { useDispatch } from 'react-redux';
 import { login } from '../../redux/auth/authSlice';
@@ -11,9 +11,11 @@ const { Title, Text } = Typography;
 const Login = () => {
     const dispatch = useDispatch();
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false)
 
     const handleLogin = async (userData) => {
         try {
+            setLoading(true)
             const { data } = await axiosInstance.post("auth/login", userData);
 
             if (data.success) {
@@ -30,6 +32,8 @@ const Login = () => {
             } else {
                 message.error("An unexpected error occurred. Please try again.");
             }
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -87,6 +91,8 @@ const Login = () => {
                         <Button
                             type="primary"
                             htmlType='submit'
+                            loading={loading}
+                            disabled={loading}
                             style={{
                                 width: "100%",
                                 borderRadius: "8px"

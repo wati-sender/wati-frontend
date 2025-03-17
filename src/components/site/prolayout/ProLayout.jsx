@@ -5,7 +5,7 @@ import { ProConfigProvider, ProLayout } from "@ant-design/pro-components";
 import defaultProps from "./DefaultProps";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Avatar, ConfigProvider, Dropdown, message, Tooltip } from "antd";
+import { Avatar, Button, ConfigProvider, Dropdown, message, Tooltip } from "antd";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../redux/auth/authSlice";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -92,29 +92,9 @@ function ProLayoutWrapper({ children }) {
             );
           }}
           avatarProps={{
-            src: <Avatar icon={<UserOutlined />} />,
+            src: <Button>Logout</Button>,
             size: "small",
-            render: (props, dom) => {
-              return (
-                <Dropdown
-                  menu={{
-                    items: [
-                      {
-                        key: "logout",
-                        icon: <LogoutOutlined />,
-                        label: "Logout",
-                        onClick: () => {
-                          dispatch(logout())
-                          navigate("/");
-                        },
-                      },
-                    ],
-                  }}
-                >
-                  {dom}
-                </Dropdown>
-              );
-            },
+            render: () => <Button icon={<LogoutOutlined />} type="primary" onClick={() => { dispatch(logout()); navigate("/"); }}>Logout</Button>
           }}
           headerContentRender={() => {
             return (

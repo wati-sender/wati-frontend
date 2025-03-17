@@ -44,7 +44,6 @@ const Campaign = () => {
     {
       title: "Contact",
       content: <AllContacts
-        showSelect
         selectedContacts={selectedContacts}
         setSelectedContacts={setSelectedContacts}
       />,
@@ -81,7 +80,7 @@ const Campaign = () => {
           template_name: selectedTemplate,
           account_ids: selectedAccounts,
           broadcast_name: campaignName,
-          receivers: selectedContacts.map((contact) => ({ whatsappNumber: `${contact.countryCode}${contact?.phone}` }))
+          receivers: selectedContacts.map((contact) => ({ whatsappNumber: contact?.phone }))
         }
         const { data } = await axiosInstance.post("/messages/send/bulk", payload)
         if (data.success) {
