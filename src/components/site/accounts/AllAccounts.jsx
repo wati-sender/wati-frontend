@@ -128,7 +128,7 @@ const AllAccounts = ({
     const rowSelection = {
         selectedRowKeys: selectedAccounts,
         onChange: (selectedRowKeys, selectedRows) => {
-            setSelectedAccounts(selectedRows.map(({ _id }) => _id))
+            setSelectedAccounts(selectedRows.map((item) => item?._id))
         },
         columnTitle: CustomSelectAll
     };
@@ -293,7 +293,7 @@ const AllAccounts = ({
                                 if (ps !== pageSize) setPageSize(ps);
                             },
                         }}
-                        rowKey={(record) => record._id}
+                        rowKey={(record) => record?._id}
                         footer={() => {
                             return (
                                 <Row >
