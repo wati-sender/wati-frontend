@@ -118,7 +118,7 @@ const AllAccounts = ({
         return <Checkbox onChange={(e) => {
             const checked = e.target.checked;
             if (checked) {
-                setSelectedAccounts(allAccounts.map((item) => item._id))
+                setSelectedAccounts(allAccounts.map((item) => item?._id))
             } else {
                 setSelectedAccounts([])
             }
