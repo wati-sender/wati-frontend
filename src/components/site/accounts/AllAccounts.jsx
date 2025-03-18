@@ -16,7 +16,6 @@ const AllAccounts = ({
     setSelectedAccounts
 }) => {
 
-    console.log("selectedAccounts", selectedAccounts);
 
     const [loading, setLoading] = useState(false);
     const [filterModal, setFilterModal] = useState(false);
@@ -70,6 +69,7 @@ const AllAccounts = ({
 
     useEffect(() => {
         getAccountData(filters);
+        setSelectedAccounts([])
     }, [page, pageSize, debounce])
 
 
@@ -114,15 +114,56 @@ const AllAccounts = ({
         }
     };
 
+    const handleSelectAll = async (checked, query) => {
+        if (!checked) {
+            setSelectedAccounts([]);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const queryParams = new URLSearchParams();
+
+            if (query.account_status !== "ALL") {
+                queryParams.append("account_status", query.account_status);
+            }
+
+            if (query.quality_rating !== "ALL") {
+                queryParams.append("quality_rating", query.quality_rating);
+            }
+
+            if (search) {
+                queryParams.append("search", search);
+            }
+
+            const queryString = queryParams.toString();
+            const url = `accounts/all/ids${queryString ? `?${queryString}` : ""}`;
+            const { data } = await axiosInstance.get(url);
+
+            if (data?.status) {
+                setSelectedAccounts(data?.ids)
+            }
+
+
+        } catch (error) {
+            message.error(error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
     const CustomSelectAll = () => {
         return <Checkbox onChange={(e) => {
             const checked = e.target.checked;
-            if (checked) {
-                setSelectedAccounts(allAccounts.map((item) => item?._id))
-            } else {
-                setSelectedAccounts([])
-            }
-        }} />
+            // if (checked) {
+            //     setSelectedAccounts(allAccounts.map((item) => item?._id))
+            // } else {
+            //     setSelectedAccounts([])
+            // }
+            handleSelectAll(checked, filters)
+
+        }} indeterminate={selectedAccounts.length !== total && selectedAccounts.length !== 0} checked={selectedAccounts.length === total} />
     }
 
     const rowSelection = {
@@ -323,6 +364,8 @@ const AllAccounts = ({
                 onOk={() => {
                     getAccountData(filters);
                     setFilterModal(false);
+                    setSelectedAccounts([])
+                    setPage(1)
                 }}
                 onCancel={() => setFilterModal(false)}
                 okText="Apply"
@@ -341,6 +384,8 @@ const AllAccounts = ({
                                 { label: "ALL", value: "ALL" },
                                 { label: "CONNECTED", value: "CONNECTED" },
                                 { label: "BANNED", value: "BANNED" },
+                                { label: "MIGRATED", value: "MIGRATED" },
+                                { label: "RESTRICTED", value: "RESTRICTED" },
                                 { label: "FLAG", value: "FLAG" },
                             ]}
                         />
