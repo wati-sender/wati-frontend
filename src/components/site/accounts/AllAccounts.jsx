@@ -13,7 +13,7 @@ const AllAccounts = ({
     showSelect,
     showDelete,
     selectedAccounts,
-    setSelectedAccounts
+    setSelectedAccounts = () => { }
 }) => {
 
 
