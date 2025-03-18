@@ -16,6 +16,8 @@ const AllAccounts = ({
     setSelectedAccounts
 }) => {
 
+    console.log("selectedAccounts", selectedAccounts);
+
     const [loading, setLoading] = useState(false);
     const [filterModal, setFilterModal] = useState(false);
     const [filters, setFilters] = useState({
@@ -35,8 +37,8 @@ const AllAccounts = ({
         try {
             const queryParams = new URLSearchParams();
 
-            // queryParams.append("page", page - 1);
-            // queryParams.append("limit", pageSize);
+            queryParams.append("page", page - 1);
+            queryParams.append("limit", pageSize);
 
             if (query.account_status !== "ALL") {
                 queryParams.append("account_status", query.account_status);
@@ -68,9 +70,7 @@ const AllAccounts = ({
 
     useEffect(() => {
         getAccountData(filters);
-    // }, [page, pageSize, debounce])
-    }, [debounce])
-    
+    }, [page, pageSize, debounce])
 
 
     const handleUpload = async (file) => {
@@ -128,7 +128,7 @@ const AllAccounts = ({
     const rowSelection = {
         selectedRowKeys: selectedAccounts,
         onChange: (selectedRowKeys, selectedRows) => {
-            setSelectedAccounts(selectedRows.map((item) => item?._id))
+            setSelectedAccounts(selectedRows.map(({ _id }) => _id))
         },
         columnTitle: CustomSelectAll
     };
@@ -217,6 +217,12 @@ const AllAccounts = ({
             render: (username) => username ?? "-",
         },
         {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (status) => status ?? "-",
+        },
+        {
             title: 'Password',
             dataIndex: 'password',
             key: 'password',
@@ -293,7 +299,7 @@ const AllAccounts = ({
                                 if (ps !== pageSize) setPageSize(ps);
                             },
                         }}
-                        rowKey={(record) => record?._id}
+                        rowKey={(record) => record._id}
                         footer={() => {
                             return (
                                 <Row >
