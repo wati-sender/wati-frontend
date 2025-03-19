@@ -1,6 +1,6 @@
-import { Button, Card, Flex, message, Popconfirm, Progress, Row, Space, Table, Tooltip, Typography } from 'antd';
-import React, { useEffect, useMemo, useState } from 'react'
-import { DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Flex, message, Row, Table, Typography } from 'antd';
+import React, { useEffect, useState } from 'react'
+import { PlusCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import TableActions from '../../common/TableActions';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,10 +11,8 @@ import { useDebounce } from '../useDebounce';
 const { Text } = Typography
 const AllCampaign = () => {
 
-    // const allTemplates = templateData.result.items
     const [allCampaigns, setAllCampaigns] = useState([])
     const [loading, setLoading] = useState(false)
-    const [campaignIds, setCampaignIds] = useState([]);
 
     const navigate = useNavigate()
 
@@ -45,48 +43,18 @@ const AllCampaign = () => {
         getCampaignsData();
     }, [page, pageSize, debounce])
 
-    const tableButtons = useMemo(() => {
-        return [
-            <Button danger type='primary' disabled={campaignIds.length <= 0} onClick={() => handleMultipleDelete(campaignIds)}>
-                Delete Selected
-            </Button>,
-            <Button
-                type="primary"
-                key={"create_template"}
-                onClick={() => {
-                    navigate("add");
-                }}
-                icon={<PlusCircleOutlined />}
-            >
-                Create Campaign
-            </Button>,
-        ];
-    }, [navigate, campaignIds]);
-
-    const rowSelectionDelete = {
-        onChange: (selectedRowKeys) => {
-            setCampaignIds(selectedRowKeys);
-        },
-    };
-
-    const handleMultipleDelete = async (userIds) => {
-        try {
-            // const { data } = await axiosInstance.post("/accounts/delete/multiple", { userIds })
-            message.success("Selected campaigns deleted successfully")
-            getCampaignsData();
-        } catch (error) {
-            message.error(error.message)
-        }
-    }
-    const handleSingleDelete = async (userId) => {
-        try {
-            // const { data } = await axiosInstance.post("/accounts/delete/single", { userId })
-            message.success("Campaign deleted successfully")
-            getCampaignsData();
-        } catch (error) {
-            message.error(error.message)
-        }
-    }
+    const tableButtons = [
+        <Button
+            type="primary"
+            key={"create_template"}
+            onClick={() => {
+                navigate("add");
+            }}
+            icon={<PlusCircleOutlined />}
+        >
+            Create Campaign
+        </Button>
+    ]
 
     const columns = [
         {
@@ -119,36 +87,6 @@ const AllCampaign = () => {
             key: 'totalContacts',
             render: (recipients) => `${recipients} Contacts`
         },
-        {
-            title: "Actions",
-            key: "action",
-            fixed: "right",
-            width: 100,
-            render: (_, record, index) => (
-                <Flex gap="small" vertical>
-                    <Flex wrap gap="small">
-                        <Tooltip
-                            color="red"
-                            title={<span style={{ fontSize: "0.8rem" }}>Delete</span>}
-                        >
-                            <Popconfirm
-                                key={`confirmation-${record?._id}`}
-                                icon={""}
-                                description="Are you sure to delete this Account?"
-                                onConfirm={() => {
-                                    handleSingleDelete(record?._id);
-                                }}
-                                onCancel={() => { }}
-                                okText="Yes"
-                                cancelText="No"
-                            >
-                                <Button size="small" shape="circle" icon={<DeleteOutlined />} />
-                            </Popconfirm>
-                        </Tooltip>
-                    </Flex>
-                </Flex>
-            ),
-        },
     ];
 
     return (
@@ -168,7 +106,6 @@ const AllCampaign = () => {
 
                 <Card>
                     <Table
-                        rowSelection={rowSelectionDelete}
                         loading={loading}
                         columns={columns}
                         dataSource={allCampaigns}
