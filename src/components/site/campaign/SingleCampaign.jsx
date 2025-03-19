@@ -16,19 +16,6 @@ const SingleCampaign = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
-    const statisticsIcons = {
-        totalLinks: <LinkOutlined />,
-        totalProcessing: <HourglassOutlined />,
-        totalQueued: <ClockCircleOutlined />,
-        totalSent: <SendOutlined />,
-        totalDelivered: <CheckCircleOutlined />,
-        totalOpen: <CheckCircleOutlined />,
-        totalReplied: <CheckCircleOutlined />,
-        totalFailed: <CloseCircleOutlined style={{ color: "red" }} />,
-        totalStopped: <CloseCircleOutlined />,
-        totalSending: <SendOutlined />
-    };
-
     const statisticData = useMemo(() => {
 
         if (campaign?.statistics) {
@@ -126,7 +113,8 @@ const SingleCampaign = () => {
             key: 'name',
             render: (name) => name ?? "-",
         },
-        { title: 'UserName', dataIndex: 'username', key: 'username' },
+        { title: 'Phone', dataIndex: 'phone', key: 'phone' },
+        { title: 'Username', dataIndex: 'username', key: 'username' },
         { title: 'Password', dataIndex: 'password', key: 'password' },
         {
             title: 'Login URL',
@@ -152,21 +140,9 @@ const SingleCampaign = () => {
             <Card style={{ marginBottom: 16 }}>
                 <Typography.Text style={{ fontSize: 16 }}>Campaign Name:  <strong>{campaign?.campaign?.name} </strong></Typography.Text><br />
                 <Typography.Text style={{ fontSize: 16 }}>Selected Template: <strong>{campaign?.campaign?.selectedTemplateName}</strong></Typography.Text><br />
-                <Typography.Text style={{ fontSize: 16 }}>Selected Accounts: <strong>{campaign?.campaign?.selectedAccounts?.length} Accounts</strong></Typography.Text>
+                <Typography.Text style={{ fontSize: 16 }}>Selected Accounts: <strong>{campaign?.campaign?.selectedAccounts?.length} Accounts</strong></Typography.Text> <br />
+                <Typography.Text style={{ fontSize: 16 }}>Total Contacts: <strong>{campaign?.campaign?.totalContacts ?? 0} Contacts</strong></Typography.Text>
             </Card>
-            <Group style={{ overflow: "auto" }} title={`Statistics${campaign?.statistics?.totalContacts ? `: Total ${campaign.statistics.totalContacts} Contacts` : ''}`} >
-                {statisticData?.map(({ title, value, status }) => (
-                    <StatisticCard
-                        statistic={{
-                            title: title,
-                            value: value,
-                            status: status,
-                        }}
-                    />
-
-                ))}
-            </Group>
-            <Divider />
             <Card title="Selected Accounts">
                 <Table
                     columns={columns}
@@ -190,9 +166,14 @@ const SingleCampaign = () => {
                     <Spin size="large" style={{ display: 'flex', justifyContent: 'center' }} />
                 ) : reportData ? (
                     <>
-                        <Card style={{ marginBottom: 16 }}>
+                        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 15 } , header: { padding: 15}}} title="Campaign Details">
+                            <Typography.Text><strong>Campaign Name:</strong> {reportData?.broadcast?.name}</Typography.Text><br />
+                            <Typography.Text><strong>Status:</strong> {reportData?.broadcast?.status}</Typography.Text><br />
+                            <Typography.Text><strong>Sent At:</strong> {new Date(reportData?.broadcast?.sentAt).toLocaleString()}</Typography.Text>
+                        </Card>
+                        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 15 } , header: { padding: 15} }} title="Account Details">
                             <Typography.Text><strong>Name:</strong> {reportData.account.name}</Typography.Text><br />
-                            <Typography.Text><strong>Phone:</strong> +{reportData.account.phone}</Typography.Text><br />
+                            <Typography.Text><strong>Phone:</strong> {reportData.account.phone}</Typography.Text><br />
                             <Typography.Text><strong>Username:</strong> {reportData.account.username}</Typography.Text>
                         </Card>
 
@@ -221,12 +202,11 @@ const SingleCampaign = () => {
                                             maxWidth: '200px' // Keeps consistent size
                                         }}
                                     >
-                                        {statisticsIcons[key] || <SendOutlined />} {/* Replace with actual icons */}
                                         <Typography.Title level={5} style={{ marginTop: 8, fontSize: 16 }}>
                                             {value}
                                         </Typography.Title>
-                                        <Typography.Text style={{ fontSize: 12 }}>
-                                            {key.replace(/total/, '')}
+                                        <Typography.Text style={{ fontSize: 12, textTransform: 'capitalize' }}>
+                                            {key}
                                         </Typography.Text>
                                     </Card>
                                 ))}
