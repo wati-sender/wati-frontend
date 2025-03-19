@@ -1,12 +1,8 @@
-import { PageContainer, StatisticCard } from '@ant-design/pro-components';
+import { PageContainer } from '@ant-design/pro-components';
 import { Button, Card, message, Table, Typography, Modal, Spin } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
-import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, HourglassOutlined, LinkOutlined, SendOutlined } from '@ant-design/icons';
-
-const { Group, Divider } = StatisticCard;
-
 const SingleCampaign = () => {
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
@@ -166,12 +162,12 @@ const SingleCampaign = () => {
                     <Spin size="large" style={{ display: 'flex', justifyContent: 'center' }} />
                 ) : reportData ? (
                     <>
-                        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 15 } , header: { padding: 15}}} title="Campaign Details">
+                        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 15 }, header: { padding: 15 } }} title="Campaign Details">
                             <Typography.Text><strong>Campaign Name:</strong> {reportData?.broadcast?.name}</Typography.Text><br />
                             <Typography.Text><strong>Status:</strong> {reportData?.broadcast?.status}</Typography.Text><br />
                             <Typography.Text><strong>Sent At:</strong> {new Date(reportData?.broadcast?.sentAt).toLocaleString()}</Typography.Text>
                         </Card>
-                        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 15 } , header: { padding: 15} }} title="Account Details">
+                        <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 15 }, header: { padding: 15 } }} title="Account Details">
                             <Typography.Text><strong>Name:</strong> {reportData.account.name}</Typography.Text><br />
                             <Typography.Text><strong>Phone:</strong> {reportData.account.phone}</Typography.Text><br />
                             <Typography.Text><strong>Username:</strong> {reportData.account.username}</Typography.Text>
