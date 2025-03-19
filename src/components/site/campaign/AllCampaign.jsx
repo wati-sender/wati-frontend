@@ -5,6 +5,7 @@ import { PageContainer } from '@ant-design/pro-components';
 import TableActions from '../../common/TableActions';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
+import { useDebounce } from '../useDebounce';
 
 
 const { Text } = Typography
@@ -14,33 +15,35 @@ const AllCampaign = () => {
     const [allCampaigns, setAllCampaigns] = useState([])
     const [loading, setLoading] = useState(false)
     const [campaignIds, setCampaignIds] = useState([]);
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
-
-    });
 
     const navigate = useNavigate()
+
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState('');
 
     const getCampaignsData = async () => {
         setLoading(true);
         try {
-            const { data } = await axiosInstance.get("/messages/campaigns");
+            const { data } = await axiosInstance.get(`/messages/campaigns?limit=${pageSize}&page=${page - 1}&search=${search}`);
             if (data?.success) {
                 setAllCampaigns(data.campaigns);
+                setTotal(data.total);
             }
         } catch (error) {
             message.error(error.message);
         } finally {
-            setTimeout(() => {
-                setLoading(false);
-            }, 1500);
+            setLoading(false);
         }
     }
 
+    const debounce = useDebounce(search)
+
+
     useEffect(() => {
         getCampaignsData();
-    }, [])
+    }, [page, pageSize, debounce])
 
     const tableButtons = useMemo(() => {
         return [
@@ -90,7 +93,7 @@ const AllCampaign = () => {
             title: "SN",
             width: 60,
             render: (text, record, index) => {
-                return (pagination.pageSize * (pagination.current - 1) + (index + 1))
+                return (pageSize * (page - 1) + (index + 1))
             },
         },
         {
@@ -105,56 +108,17 @@ const AllCampaign = () => {
             key: 'selectedTemplateName',
         },
         {
+            title: 'Total Accounts',
+            dataIndex: 'selectedAccounts',
+            key: 'selectedAccounts',
+            render: (accounts) => `${accounts?.length} Accounts`
+        },
+        {
             title: 'Total contacts',
             dataIndex: 'totalContacts',
             key: 'totalContacts',
             render: (recipients) => `${recipients} Contacts`
         },
-        // {
-        //     title: 'Successful',
-        //     dataIndex: 'successCount',
-        //     key: 'successCount',
-        //     render: (count, record) => {
-        //         const percent = ((count * 100) / record.totalContacts)
-
-        //         return (
-        //             <Space direction='vertical'>
-        //                 <Text>{count} contacts </Text>
-        //                 <Progress
-        //                     percent={percent ?? 0}
-        //                     percentPosition={{
-        //                         align: 'center',
-        //                         type: 'inner',
-        //                     }}
-        //                     size={[100, 20]}
-        //                     strokeColor={percent === 0 ? "#CCFFCC" : "green"}
-        //                 />
-        //             </Space>
-        //         )
-        //     }
-        // },
-        // {
-        //     title: 'Failed',
-        //     dataIndex: 'failedCount',
-        //     key: 'failedCount',
-        //     render: (count, record) => {
-        //         const percent = ((count * 100) / record.totalContacts)
-        //         return (
-        //             <Space direction='vertical'>
-        //                 <Text>{count} contacts </Text>
-        //                 <Progress
-        //                     percent={percent ?? 0}
-        //                     percentPosition={{
-        //                         align: 'center',
-        //                         type: 'inner',
-        //                     }}
-        //                     size={[100, 20]}
-        //                     strokeColor={percent === 0 ? "#FFCCCC" : "#FF6666"}
-        //                 />
-        //             </Space>
-        //         )
-        //     }
-        // },
         {
             title: "Actions",
             key: "action",
@@ -197,6 +161,9 @@ const AllCampaign = () => {
             }}>
                 <TableActions
                     buttons={tableButtons}
+                    showSearch
+                    search={search}
+                    setSearch={setSearch}
                 />
 
                 <Card>
@@ -206,12 +173,12 @@ const AllCampaign = () => {
                         columns={columns}
                         dataSource={allCampaigns}
                         pagination={{
-                            current: pagination.current,
-                            pageSize: pagination.pageSize,
-                            total: allCampaigns.length,
-                            showSizeChanger: true,
-                            onChange: (page, pageSize) => {
-                                setPagination({ current: page, pageSize });
+                            total: total,
+                            current: page,
+                            pageSize: pageSize,
+                            onChange(p, ps) {
+                                if (p !== page) setPage(p);
+                                if (ps !== pageSize) setPageSize(ps);
                             },
                         }}
                         rowKey={(record) => record?.id}
@@ -219,7 +186,7 @@ const AllCampaign = () => {
                             return (
                                 <Row >
                                     <Typography.Text style={{ marginRight: 10 }}>
-                                        {"Total"}: <b>{allCampaigns.length}</b>
+                                        {"Total"}: <b>{total}</b>
                                     </Typography.Text>
                                 </Row>
                             );
