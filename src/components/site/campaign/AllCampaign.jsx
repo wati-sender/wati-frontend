@@ -87,6 +87,12 @@ const AllCampaign = () => {
             key: 'totalContacts',
             render: (recipients) => `${recipients} Contacts`
         },
+        {
+            title: 'Date',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            render: (date) => new Date(date).toLocaleString()
+        },
     ];
 
     return (
