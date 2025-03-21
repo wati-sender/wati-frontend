@@ -264,6 +264,12 @@ const AllAccounts = ({
             render: (status) => status ?? "-",
         },
         {
+            title: 'Quality Rating',
+            dataIndex: 'qualityRating',
+            key: 'qualityRating',
+            render: (rating) => rating ?? "-",
+        },
+        {
             title: 'Password',
             dataIndex: 'password',
             key: 'password',
@@ -402,8 +408,8 @@ const AllAccounts = ({
                             options={[
                                 { label: "ALL", value: "ALL" },
                                 { label: "GREEN", value: "GREEN" },
-                                { label: "MEDIUM", value: "MEDIUM" },
-                                { label: "LOW", value: "LOW" },
+                                { label: "YELLOW", value: "YELLOW" },
+                                { label: "UNKNOWN", value: "UNKNOWN" },
                             ]}
                         />
                     </Form.Item>
