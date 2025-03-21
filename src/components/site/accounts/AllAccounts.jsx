@@ -1,4 +1,4 @@
-import { Button, Card, Checkbox, Dropdown, Flex, Form, message, Modal, Popconfirm, Row, Select, Table, Tooltip, Typography, Upload } from 'antd';
+import { Button, Card, Checkbox, Dropdown, Flex, Form, message, Modal, Popconfirm, Row, Select, Table, Tag, Tooltip, Typography, Upload } from 'antd';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { DeleteOutlined, DownOutlined, FilterOutlined, ImportOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react'
@@ -8,7 +8,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Link } from 'react-router-dom';
 import { useDebounce } from '../useDebounce';
 
-
+const { Text } = Typography
 const AllAccounts = ({
     showSelect,
     showDelete,
@@ -258,6 +258,12 @@ const AllAccounts = ({
             render: (username) => username ?? "-",
         },
         {
+            title: 'Wallet',
+            dataIndex: 'wallet',
+            key: 'wallet',
+            render: (wallet) => <Text strong style={{ color: wallet < 0 ? "#FF6347" : "#00B16A" }}>{"₹" + wallet}</Text> ?? "-",
+        },
+        {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
@@ -329,6 +335,8 @@ const AllAccounts = ({
                 />
 
                 <Card>
+                    <Text>Last Update : {new Date(allAccounts[0]?.updatedAt).toLocaleString()}</Text>
+                    <br /> <br />
                     <Table
                         rowSelection={showSelect ? rowSelection : showDelete && rowSelectionDelete}
                         columns={columns}
@@ -420,4 +428,4 @@ const AllAccounts = ({
     )
 }
 
-export default AllAccounts    
+export default AllAccounts 
