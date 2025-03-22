@@ -7,9 +7,6 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
     const [contacts, setContacts] = useState([]);
     const [errors, setErrors] = useState([]);
 
-    // Define the fixed phone number length (10 digits)
-    const fixedPhoneLength = 12;
-
     const handleInputChange = (e) => {
         const { value } = e.target;
         setEnteredContactString(value);
@@ -33,46 +30,27 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
 
 
     // Validation functions
-    const isInvalidPhone = (phone) => !/^\d+$/.test(phone) || phone.length !== fixedPhoneLength;
-
-    const validateContacts = () => {
-        let validationErrors = [];
-
-        contacts.forEach((contact, index) => {
-            let rowErrors = [];
-            if (isInvalidPhone(contact.phone)) rowErrors.push(`Phone Number must be exactly ${fixedPhoneLength} digits`);
-
-            if (rowErrors.length) {
-                validationErrors.push(`Row ${index + 1}: ${rowErrors.join(", ")}`);
-            }
-        });
-
-        if (validationErrors.length) {
-            setErrors(validationErrors);
-            message.error(validationErrors.join(" | "));
-            return false;
-        }
-
-        return true;
-    };
+    const isInvalidPhone = (phone) => !/^\d+$/.test(phone);
 
     const handleOk = async () => {
-        if (!validateContacts()) {
-            return;
-        }
-
         setContactsData(prev => {
             const existingContacts = new Set(prev.map(contact => contact.phone));
 
-            const uniqueContacts = contacts.filter(contact => {
-                if (existingContacts.has(contact.phone)) {
-                    return false; 
-                }
-                existingContacts.add(contact.phone);
-                return true; 
-            });
+            const uniqueContacts = contacts
+                .filter(contact => contact.phone && contact.phone.toString().length === 12) 
+                .filter(contact => {
+                    if (existingContacts.has(contact.phone)) {
+                        return false;
+                    }
+                    existingContacts.add(contact.phone);
+                    return true;
+                });
 
-            message.success("Contacts added successfully");
+            if (uniqueContacts.length > 0) {
+                message.success("Contacts added successfully");
+            } else {
+                message.info("No new contacts were added (all duplicates or invalid).");
+            }
 
             setErrors([]);
             setEnteredContactString("");
@@ -83,6 +61,8 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
 
         setContacts([]);
     };
+
+
     const columns = [
         {
             title: "SN",
@@ -123,6 +103,7 @@ const AddMultipleContacts = ({ open, setOpen, setContactsData }) => {
                 dataSource={contacts}
                 rowKey={(record, index) => index}
                 pagination={false}
+                scroll={{ y: 600 }}
             />
         </Modal>
     );
