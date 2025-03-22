@@ -41,17 +41,20 @@ const AllContacts = ({
             const sheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-            const newContacts = jsonData.map(({ phone }) => ({ phone }));
+            // const newContacts = jsonData.map(({ phone }) => ({ phone }));
+            const newContacts = jsonData
+                .map(({ phone }) => ({ phone }))
+                .filter(contact => contact.phone && contact.phone.toString().length === 12);
 
             setContacts(prev => {
                 const existingContacts = new Set(prev.map((contact) => contact.phone));
 
                 const uniqueContacts = newContacts.filter(contact => {
                     if (existingContacts.has(contact.phone)) {
-                        return false; 
+                        return false;
                     }
                     existingContacts.add(contact.phone);
-                    return true; 
+                    return true;
                 });
 
                 if (uniqueContacts.length > 0) {
