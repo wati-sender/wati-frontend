@@ -22,9 +22,12 @@ const AllAccounts = ({
     const [exporting, setExporting] = useState(false);
     const [filterModal, setFilterModal] = useState(false);
     const [filters, setFilters] = useState({
-        account_status: "ALL",
-        quality_rating: "ALL"
+        account_status: ["ALL"],
+        quality_rating: ["ALL"]
     })
+
+    console.log("filters", filters);
+
     const [allAccounts, setAllAccounts] = useState([]);
     const [accountIds, setAccountIds] = useState([]);
 
@@ -41,12 +44,12 @@ const AllAccounts = ({
             queryParams.append("page", page - 1);
             queryParams.append("limit", pageSize);
 
-            if (query.account_status !== "ALL") {
-                queryParams.append("account_status", query.account_status);
+            if (!query.account_status.includes("ALL")) {
+                queryParams.append("account_status", query.account_status.join("_"));
             }
 
-            if (query.quality_rating !== "ALL") {
-                queryParams.append("quality_rating", query.quality_rating);
+            if (!query.quality_rating.includes("ALL")) {
+                queryParams.append("quality_rating", query.quality_rating.join("_"));
             }
 
             if (search) {
@@ -437,6 +440,7 @@ const AllAccounts = ({
                         initialValue={filters.account_status}
                     >
                         <Select
+                            mode='multiple'
                             value={filters.account_status}
                             onChange={(value) => setFilters(prev => ({ ...prev, account_status: value }))}
                             style={{ width: "100%" }}
@@ -456,6 +460,7 @@ const AllAccounts = ({
                         initialValue={filters.quality_rating}
                     >
                         <Select
+                            mode='multiple'
                             value={filters.quality_rating}
                             onChange={(value) => setFilters(prev => ({ ...prev, quality_rating: value }))}
                             style={{ width: "100%" }}
