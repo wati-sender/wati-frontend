@@ -23,10 +23,9 @@ const AllAccounts = ({
     const [filterModal, setFilterModal] = useState(false);
     const [filters, setFilters] = useState({
         account_status: ["ALL"],
-        quality_rating: ["ALL"]
+        quality_rating: ["ALL"],
+        tier: ["ALL"]
     })
-
-    console.log("filters", filters);
 
     const [allAccounts, setAllAccounts] = useState([]);
     const [accountIds, setAccountIds] = useState([]);
@@ -35,6 +34,13 @@ const AllAccounts = ({
     const [total, setTotal] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState('');
+    const debounce = useDebounce(search)
+
+    const MESSAGES_TEIRS = {
+        TIER_1K: "1000 Messages",
+        TIER_10K: "10000 Messages",
+        TIER_100K: "100000 Messages",
+    }
 
     const getAccountData = async (query) => {
         setLoading(true);
@@ -50,6 +56,10 @@ const AllAccounts = ({
 
             if (!query.quality_rating.includes("ALL")) {
                 queryParams.append("quality_rating", query.quality_rating.join("_"));
+            }
+
+            if (!query.tier.includes("ALL")) {
+                queryParams.append("tier", query.tier.join("-"));
             }
 
             if (search) {
@@ -69,8 +79,6 @@ const AllAccounts = ({
         }
 
     }
-
-    const debounce = useDebounce(search)
 
     useEffect(() => {
         getAccountData(filters);
@@ -129,12 +137,16 @@ const AllAccounts = ({
             setLoading(true);
             const queryParams = new URLSearchParams();
 
-            if (query.account_status !== "ALL") {
+            if (!query.account_status.includes("ALL")) {
                 queryParams.append("account_status", query.account_status);
             }
 
-            if (query.quality_rating !== "ALL") {
+            if (!query.quality_rating.includes("ALL")) {
                 queryParams.append("quality_rating", query.quality_rating);
+            }
+
+            if (!query.tier.includes("ALL")) {
+                queryParams.append("tier", query.tier.join("-"));
             }
 
             if (search) {
@@ -217,12 +229,16 @@ const AllAccounts = ({
             queryParams.append("page", 0);
             queryParams.append("limit", total);
 
-            if (query.account_status !== "ALL") {
+            if (!query.account_status.includes("ALL")) {
                 queryParams.append("account_status", query.account_status);
             }
 
-            if (query.quality_rating !== "ALL") {
+            if (!query.quality_rating.includes("ALL")) {
                 queryParams.append("quality_rating", query.quality_rating);
+            }
+
+            if (!query.tier.includes("ALL")) {
+                queryParams.append("tier", query.tier.join("-"));
             }
 
             if (search) {
@@ -239,6 +255,7 @@ const AllAccounts = ({
                 Wallet: account.wallet,
                 Status: account.status,
                 "Quality Rating": account.qualityRating,
+                "Message Limit": MESSAGES_TEIRS[account.messageTier],
                 Password: account.password,
                 "Login URL": account.loginUrl,
             }));
@@ -325,16 +342,22 @@ const AllAccounts = ({
             render: (rating) => rating ?? "-",
         },
         {
+            title: 'Message Limit',
+            dataIndex: 'messageTier',
+            key: 'messageTier',
+            render: (tier) => MESSAGES_TEIRS[tier] ?? "-",
+        },
+        {
             title: 'Password',
             dataIndex: 'password',
             key: 'password',
-            render: (password) => password ?? "-",
+            render: (password) => <Text copyable>{password}</Text> ?? "-",
         },
         {
             title: 'Login URL',
             dataIndex: 'loginUrl',
             key: 'loginUrl',
-            render: (loginUrl) => <Link to={loginUrl} target='_blank'>{loginUrl} </Link> ?? "-",
+            render: (loginUrl, { username, password }) => <Link to={`${loginUrl}?email=${username}`} target='_blank'>{loginUrl} </Link> ?? "-",
         },
         {
             title: "Actions",
@@ -469,6 +492,23 @@ const AllAccounts = ({
                                 { label: "GREEN", value: "GREEN" },
                                 { label: "YELLOW", value: "YELLOW" },
                                 { label: "UNKNOWN", value: "UNKNOWN" },
+                            ]}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="Filter by Message Limit"
+                        initialValue={filters.tier}
+                    >
+                        <Select
+                            mode='multiple'
+                            value={filters.tier}
+                            onChange={(value) => setFilters(prev => ({ ...prev, tier: value }))}
+                            style={{ width: "100%" }}
+                            options={[
+                                { label: "ALL", value: "ALL" },
+                                { label: "1000 Messages", value: "TIER_1K" },
+                                { label: "10000 Messages", value: "TIER_10K" },
+                                { label: "100000 Messages", value: "TIER_100K" },
                             ]}
                         />
                     </Form.Item>
