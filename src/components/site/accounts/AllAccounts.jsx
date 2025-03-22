@@ -309,54 +309,63 @@ const AllAccounts = ({
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            width: 120,
             render: (name) => name ?? "-",
         },
         {
             title: 'Phone',
             dataIndex: 'phone',
             key: 'phone',
+            width: 150,
             render: (phone) => phone ?? "-",
         },
         {
             title: 'Username',
             dataIndex: 'username',
             key: 'username',
+            width: 250,
             render: (username) => username ?? "-",
         },
         {
             title: 'Wallet',
             dataIndex: 'wallet',
             key: 'wallet',
+            width: 150,
             render: (wallet) => <Text strong style={{ color: wallet < 0 ? "#FF6347" : "#00B16A" }}>{"₹" + wallet}</Text> ?? "-",
         },
         {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
+            width: 150,
             render: (status) => status ?? "-",
         },
         {
             title: 'Quality Rating',
             dataIndex: 'qualityRating',
             key: 'qualityRating',
+            width: 150,
             render: (rating) => rating ?? "-",
         },
         {
             title: 'Message Limit',
             dataIndex: 'messageTier',
             key: 'messageTier',
+            width: 150,
             render: (tier) => MESSAGES_TEIRS[tier] ?? "-",
         },
         {
             title: 'Password',
             dataIndex: 'password',
             key: 'password',
+            width: 200,
             render: (password) => <Text copyable>{password}</Text> ?? "-",
         },
         {
             title: 'Login URL',
             dataIndex: 'loginUrl',
             key: 'loginUrl',
+            width: 250,
             render: (loginUrl, { username, password }) => <Link to={`${loginUrl}?email=${username}`} target='_blank'>{loginUrl} </Link> ?? "-",
         },
         {
@@ -415,7 +424,7 @@ const AllAccounts = ({
                         dataSource={allAccounts}
                         loading={loading}
                         scroll={{
-                            x: 1000,
+                            x: 1500,
                         }}
                         pagination={{
                             total: total,
