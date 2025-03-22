@@ -47,13 +47,14 @@ const AllContacts = ({
                 .filter(contact => contact.phone && contact.phone.toString().length === 12);
 
             setContacts(prev => {
-                const existingContacts = new Set(prev.map((contact) => contact.phone));
+                const existingContacts = new Set(prev.map((contact) => contact.phone.toString()));
+                console.log("existingContacts", { existingContacts, newContacts });
 
                 const uniqueContacts = newContacts.filter(contact => {
-                    if (existingContacts.has(contact.phone)) {
+                    if (existingContacts.has(contact.phone.toString())) {
                         return false;
                     }
-                    existingContacts.add(contact.phone);
+                    existingContacts.add(contact.phone.toString());
                     return true;
                 });
 
