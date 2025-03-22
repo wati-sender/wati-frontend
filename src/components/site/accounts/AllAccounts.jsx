@@ -1,12 +1,13 @@
 import { Button, Card, Checkbox, Dropdown, Flex, Form, message, Modal, Popconfirm, Row, Select, Table, Tag, Tooltip, Typography, Upload } from 'antd';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
-import { DeleteOutlined, DownOutlined, FilterOutlined, ImportOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownOutlined, ExportOutlined, FilterOutlined, ImportOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from 'react'
 import TableActions from '../../common/TableActions';
 import * as XLSX from "xlsx";
 import axiosInstance from '../../../axios/axiosInstance';
 import { Link } from 'react-router-dom';
 import { useDebounce } from '../useDebounce';
+import { exportToExcel } from "react-json-to-excel";
 
 const { Text } = Typography
 const AllAccounts = ({
@@ -18,6 +19,7 @@ const AllAccounts = ({
 
 
     const [loading, setLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
     const [filterModal, setFilterModal] = useState(false);
     const [filters, setFilters] = useState({
         account_status: "ALL",
@@ -191,6 +193,7 @@ const AllAccounts = ({
             message.error(error.message)
         }
     }
+
     const handleSingleDelete = async (userId) => {
         try {
             const { data } = await axiosInstance.post("/accounts/delete/single", { userId })
@@ -201,6 +204,48 @@ const AllAccounts = ({
         } catch (error) {
             message.error(error.message)
         }
+    }
+
+    const handleExport = async (query) => {
+        setExporting(true);
+        try {
+            const queryParams = new URLSearchParams();
+
+            queryParams.append("page", 0);
+            queryParams.append("limit", total);
+
+            if (query.account_status !== "ALL") {
+                queryParams.append("account_status", query.account_status);
+            }
+
+            if (query.quality_rating !== "ALL") {
+                queryParams.append("quality_rating", query.quality_rating);
+            }
+
+            if (search) {
+                queryParams.append("search", search);
+            }
+
+            const queryString = queryParams.toString();
+            const url = `accounts/all${queryString ? `?${queryString}` : ""}`;
+            const { data } = await axiosInstance.get(url);
+            const exportData = data?.accounts?.map((account) => ({
+                Name: account?.name,
+                Phone: account.phone,
+                Username: account.username,
+                Wallet: account.wallet,
+                Status: account.status,
+                "Quality Rating": account.qualityRating,
+                Password: account.password,
+                "Login URL": account.loginUrl,
+            }));
+            exportToExcel(exportData, "accounts");
+        } catch (error) {
+            message.error(error.message);
+        } finally {
+            setExporting(false);
+        }
+
     }
 
     const tableButtons = [
@@ -216,6 +261,7 @@ const AllAccounts = ({
             showUploadList={false} >
             <Button type='primary' icon={<ImportOutlined />}>Import</Button>
         </Upload >,
+        <Button loading={exporting} disabled={exporting} onClick={() => handleExport(filters)} type='primary' icon={<ExportOutlined />}>Export</Button>,
         <Dropdown
             menu={{
                 items: [
@@ -428,4 +474,4 @@ const AllAccounts = ({
     )
 }
 
-export default AllAccounts 
+export default AllAccounts    
