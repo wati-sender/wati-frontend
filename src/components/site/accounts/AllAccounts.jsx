@@ -42,6 +42,11 @@ const AllAccounts = ({
         TIER_100K: "100000 Messages",
     }
 
+    const CURRENCY_SYMBOL = {
+        "INR": "₹",
+        "USD": "$",
+    }
+
     const getAccountData = async (query) => {
         setLoading(true);
         try {
@@ -298,6 +303,8 @@ const AllAccounts = ({
         </Dropdown>
     ]
 
+
+
     const columns = [
         {
             title: "SN",
@@ -331,7 +338,7 @@ const AllAccounts = ({
             dataIndex: 'wallet',
             key: 'wallet',
             width: 150,
-            render: (wallet) => <Text strong style={{ color: wallet < 0 ? "#FF6347" : "#00B16A" }}>{"₹" + wallet}</Text> ?? "-",
+            render: (wallet, { currency = "INR" }) => <Text strong style={{ color: wallet < 0 ? "#FF6347" : "#00B16A" }}>{CURRENCY_SYMBOL[currency] + wallet}</Text> ?? "-",
         },
         {
             title: 'Status',
@@ -366,7 +373,7 @@ const AllAccounts = ({
             dataIndex: 'loginUrl',
             key: 'loginUrl',
             width: 250,
-            render: (loginUrl, { username, password }) => <Link to={`${loginUrl}?email=${username}`} target='_blank'>{loginUrl} </Link> ?? "-",
+            render: (loginUrl, { username }) => <Link to={`${loginUrl}?email=${username}`} target='_blank'>{loginUrl} </Link> ?? "-",
         },
         {
             title: "Actions",
