@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Flex, Form, Input, message, Row, Select, Space, Typography } from "antd";
+import { Button, Card, Col, Flex, Form, Input, message, Row, Select, Space, Typography } from "antd";
 import Buttons from "./Buttons";
 import { PageContainer, ProCard } from "@ant-design/pro-components";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
 import UploadMedia from "./UploadMedia";
+import { DeleteOutlined, UploadOutlined } from "@ant-design/icons";
+import MediaModal from "./MediaModal";
 
 const AddTemplate = () => {
     const navigate = useNavigate()
@@ -18,7 +20,7 @@ const AddTemplate = () => {
         }
     ])
     const [imageUrl, setImageUrl] = useState("");
-    const [imageUploading, setImageUploading] = useState(false)
+    const [mediaModalOpen, setMediaModalOpen] = useState(false)
     const [startAccountIndex, setStartAccountIndex] = useState(null)
     const [endAccountIndex, setEndAccountIndex] = useState(null)
     const [templateType, setTemplateType] = useState("rich_card")
@@ -93,32 +95,6 @@ const AddTemplate = () => {
             }
         }
     };
-
-    const handleUpload = async ({ file }) => {
-        try {
-            setImageUploading(true);
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("type", "image");
-
-            const { data } = await axiosInstance.post("/media/upload", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            if (data?.success) {
-                message.success(data?.message)
-                setImageUrl(data?.data.url);
-            } else {
-                message.success(data?.message)
-            }
-        } catch (error) {
-            message.error(error.message);
-        }
-
-
-    }
 
     const handleAddButton = () => {
         if (buttons?.length === 3) {
@@ -223,7 +199,19 @@ const AddTemplate = () => {
                                         ]}
                                     >
                                         <Space direction="vertical" style={{ width: "100%" }}>
-                                            <UploadMedia url={imageUrl} loading={imageUploading} handleUpload={handleUpload} />
+                                            <Card style={{ height: 205, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                                {imageUrl ?
+                                                    <img src={imageUrl} alt="" height={165} /> : <Button onClick={() => setMediaModalOpen(true)} type="primary" icon={<UploadOutlined />}>
+                                                        Upload Media
+                                                    </Button>}
+                                                {imageUrl && <Button
+                                                    onClick={() => setImageUrl("")}
+                                                    danger
+                                                    size="small"
+                                                    icon={<DeleteOutlined />}
+                                                    style={{ position: "absolute", right: 10, top: 10 }}
+                                                />}
+                                            </Card>
                                             <Text>OR</Text>
                                             <Input
                                                 placeholder="Image Url"
@@ -340,6 +328,8 @@ const AddTemplate = () => {
                     </Flex>
 
                 </Form>
+
+                <MediaModal open={mediaModalOpen} setOpen={setMediaModalOpen} setSelectedImage={setImageUrl} />
             </ProCard>
         </PageContainer>
     );
