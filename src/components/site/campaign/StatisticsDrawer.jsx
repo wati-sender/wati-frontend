@@ -43,7 +43,7 @@ const StatisticsDrawer = ({ open, setOpen, watiCampaignId, accountId }) => {
                 pageSize,
                 pageNumber: pageNumber - 1,
                 option,
-                failedReason
+                failedReason: option === 1 ? failedReason : 0
             }
             const { data } = await axiosInstance.post("/messages/campaigns/statistics", payload)
             if (data?.success) {
@@ -105,7 +105,7 @@ const StatisticsDrawer = ({ open, setOpen, watiCampaignId, accountId }) => {
                 pageSize: totalCount,
                 pageNumber: 0,
                 option,
-                failedReason
+                failedReason: option === 1 ? failedReason : 0
             }
             const { data } = await axiosInstance.post("/messages/campaigns/statistics", payload)
             if (data?.success) {
