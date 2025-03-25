@@ -110,7 +110,7 @@ const StatisticsDrawer = ({ open, setOpen, watiCampaignId, accountId }) => {
             const { data } = await axiosInstance.post("/messages/campaigns/statistics", payload)
             if (data?.success) {
                 const exportData = data?.data?.result?.items?.map((itm) => ({
-                    Contact: itm?.contactPhone,
+                    phone: itm?.contactPhone,
                     Status: STATSISTIC_STATUS[itm.status],
                     "Failure Reason": itm?.failedDetail
                 }));
