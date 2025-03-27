@@ -190,13 +190,7 @@ const AddTemplate = () => {
                                         style={{ marginBottom: "15px" }}
                                         name={"image_url"}
                                         label={"Image Url"}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                type: "string",
-                                                message: "Please enter valid url",
-                                            },
-                                        ]}
+                                     
                                     >
                                         <Space direction="vertical" style={{ width: "100%" }}>
                                             <Card style={{ height: 205, display: "flex", justifyContent: "center", alignItems: "center" }}>
