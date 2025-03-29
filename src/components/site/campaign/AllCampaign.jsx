@@ -43,6 +43,8 @@ const AllCampaign = () => {
         getCampaignsData();
     }, [page, pageSize, debounce])
 
+    console.log("total contacts", allCampaigns.reduce((acc, campaign) => acc + campaign.totalContacts, 0));
+
     const tableButtons = [
         <Button
             type="primary"
