@@ -90,6 +90,7 @@ const AllAccounts = ({
         setSelectedAccounts([])
     }, [page, pageSize, debounce])
 
+    console.log("total Wallet", allAccounts.reduce((acc, account) => acc + (account.wallet * (account.currency === "USD" ? 85.77 : 1)), 0));
 
     const handleUpload = async (file) => {
         try {
