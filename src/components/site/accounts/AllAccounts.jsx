@@ -92,6 +92,7 @@ const AllAccounts = ({
 
     console.log("total Wallet", allAccounts.reduce((acc, account) => acc + (account.wallet * (account.currency === "USD" ? 85.77 : 1)), 0));
 
+
     const handleUpload = async (file) => {
         try {
             const isExcel =
@@ -144,11 +145,11 @@ const AllAccounts = ({
             const queryParams = new URLSearchParams();
 
             if (!query.account_status.includes("ALL")) {
-                queryParams.append("account_status", query.account_status);
+                queryParams.append("account_status", query.account_status.join("_"));
             }
 
             if (!query.quality_rating.includes("ALL")) {
-                queryParams.append("quality_rating", query.quality_rating);
+                queryParams.append("quality_rating", query.quality_rating.join("_"));
             }
 
             if (!query.tier.includes("ALL")) {
@@ -236,11 +237,11 @@ const AllAccounts = ({
             queryParams.append("limit", total);
 
             if (!query.account_status.includes("ALL")) {
-                queryParams.append("account_status", query.account_status);
+                queryParams.append("account_status", query.account_status.join("_"));
             }
 
             if (!query.quality_rating.includes("ALL")) {
-                queryParams.append("quality_rating", query.quality_rating);
+                queryParams.append("quality_rating", query.quality_rating.join("_"));
             }
 
             if (!query.tier.includes("ALL")) {
@@ -435,9 +436,10 @@ const AllAccounts = ({
                             x: 1500,
                         }}
                         pagination={{
-                            total: total,
+                            total,
                             current: page,
                             pageSize: pageSize,
+                            showSizeChanger: true,
                             onChange(p, ps) {
                                 if (p !== page) setPage(p);
                                 if (ps !== pageSize) setPageSize(ps);
@@ -490,7 +492,7 @@ const AllAccounts = ({
                                 { label: "BANNED", value: "BANNED" },
                                 { label: "MIGRATED", value: "MIGRATED" },
                                 { label: "RESTRICTED", value: "RESTRICTED" },
-                                { label: "FLAGGED", value: "FLAGGED" },
+                                { label: "FLAG", value: "FLAG" },
                             ]}
                         />
                     </Form.Item>
@@ -508,7 +510,6 @@ const AllAccounts = ({
                                 { label: "ALL", value: "ALL" },
                                 { label: "GREEN", value: "GREEN" },
                                 { label: "YELLOW", value: "YELLOW" },
-                                { label: "RED", value: "RED" },
                                 { label: "UNKNOWN", value: "UNKNOWN" },
                             ]}
                         />
