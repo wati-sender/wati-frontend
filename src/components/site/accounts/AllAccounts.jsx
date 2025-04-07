@@ -492,7 +492,7 @@ const AllAccounts = ({
                                 { label: "BANNED", value: "BANNED" },
                                 { label: "MIGRATED", value: "MIGRATED" },
                                 { label: "RESTRICTED", value: "RESTRICTED" },
-                                { label: "FLAG", value: "FLAG" },
+                                { label: "FLAGGED", value: "FLAGGED" },
                             ]}
                         />
                     </Form.Item>
