@@ -161,7 +161,7 @@ const StatisticsDrawer = ({ open, setOpen, watiCampaignId, accountId }) => {
                     )}
                 </Col>
                 <Col xs={12} md={6}>
-                    <Button block style={{ textAlign: "end" }} loading={exporting} disabled={exporting} onClick={handleExport} type='primary' icon={<ExportOutlined />}>Export</Button>,
+                    <Button block style={{ textAlign: "end" }} loading={exporting} disabled={exporting} onClick={handleExport} type='primary' icon={<ExportOutlined />}>Export</Button>
                 </Col>
 
             </Row>
