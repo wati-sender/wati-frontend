@@ -510,6 +510,7 @@ const AllAccounts = ({
                                 { label: "ALL", value: "ALL" },
                                 { label: "GREEN", value: "GREEN" },
                                 { label: "YELLOW", value: "YELLOW" },
+                                { label: "RED", value: "RED" },
                                 { label: "UNKNOWN", value: "UNKNOWN" },
                             ]}
                         />
